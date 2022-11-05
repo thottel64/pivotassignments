@@ -52,9 +52,7 @@ func InitProducts() {
 	}
 	// step 4 print out the data
 	log.Printf("%s", response.Status)
-	fmt.Println(len(product))
-	o := product[1]
-	fmt.Println(o)
+
 }
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -102,10 +100,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	Name := r.FormValue("Name")
 	Description := r.FormValue("Description")
 	Price := r.FormValue("Price")
-	fmt.Fprintf(w, "ID = %d\n", ID)
+	fmt.Fprintf(w, "ID = %s\n", ID)
 	fmt.Fprintf(w, "Name = %s\n", Name)
 	fmt.Fprintf(w, "Description = %s\n", Description)
-	fmt.Fprintf(w, "Price = %d\n", Price)
+	fmt.Fprintf(w, "Price = %s\n", Price)
 
 }
 func PutHandler(w http.ResponseWriter, r *http.Request) {
@@ -128,13 +126,15 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	intid := 0
 	_, err := fmt.Sscan(id, &intid)
 	if err != nil {
-		log.Fatalln(err)
 	}
 	for _, products := range product {
 		if intid > len(product) {
 			w.WriteHeader(http.StatusNotFound)
 			response := "404 status not found"
 			_, err = w.Write([]byte(response))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 		if products.ID == intid {

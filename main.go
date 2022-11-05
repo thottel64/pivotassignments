@@ -75,6 +75,9 @@ func GetIDHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			response := "404 status not found"
 			_, err = w.Write([]byte(response))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 		if products.ID == intid {
@@ -126,8 +129,9 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	intid := 0
 	_, err := fmt.Sscan(id, &intid)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
-	for _, products := range product {
+	for index, products := range product {
 		if intid > len(product) {
 			w.WriteHeader(http.StatusNotFound)
 			response := "404 status not found"
@@ -138,17 +142,12 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if products.ID == intid {
-			products.ID = intid
-			products.Price = 0
-			products.Description = ""
-			products.Name = ""
+			product = append(product[:index], product[index+1:]...)
 			response := "Product Deleted"
+			_, err = w.Write([]byte(response))
 			if err != nil {
-				log.Print("error 3")
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-			w.WriteHeader(http.StatusOK)
-			_, err = w.Write([]byte(response))
 		}
 	}
 }

@@ -6,6 +6,7 @@ import (
 )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 type testingvariables struct {
 	a               int
 	b               int
@@ -52,6 +53,9 @@ func TestFunctions(t *testing.T) {
 
 =======
 func CalulatorTest(t *testing.T) {
+=======
+func TestCalculator(t *testing.T) {
+>>>>>>> 8f7567e (fixed error with naming conventions)
 	tests := map[string]struct {
 		a, b, want         int
 		operation          func(int, int) int

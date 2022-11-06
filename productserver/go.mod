@@ -1,4 +1,4 @@
-module github.com/thottel64/pivotassignments
+module github.com/thottel64/pivotassignments/productserver
 
 go 1.19
 

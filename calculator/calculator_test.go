@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func CalulatorTest(t *testing.T) {
+func TestCalculator(t *testing.T) {
 	tests := map[string]struct {
 		a, b, want         int
 		operation          func(int, int) int

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -97,16 +98,20 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ParseForm() err: %v", err)
 		return
 	}
-	fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
-	// these fields need to be changed to match our JSON struct
-	ID := r.FormValue("ID")
-	Name := r.FormValue("Name")
-	Description := r.FormValue("Description")
-	Price := r.FormValue("Price")
-	fmt.Fprintf(w, "ID = %s\n", ID)
-	fmt.Fprintf(w, "Name = %s\n", Name)
-	fmt.Fprintf(w, "Description = %s\n", Description)
-	fmt.Fprintf(w, "Price = %s\n", Price)
+	var newProduct Product
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	err = json.Unmarshal(reqBody, &newProduct)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	product = append(product, newProduct)
+	w.WriteHeader(http.StatusCreated)
+
+	json.NewEncoder(w).Encode(newProduct)
 
 }
 func PutHandler(w http.ResponseWriter, r *http.Request) {

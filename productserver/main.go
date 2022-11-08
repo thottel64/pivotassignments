@@ -128,7 +128,6 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	product = append(product, newProduct)
 
 	json.NewEncoder(w).Encode(newProduct)
 

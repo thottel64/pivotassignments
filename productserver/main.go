@@ -115,19 +115,42 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 func PutHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	vars := mux.Vars(r)
+	id := vars["id"]
+	intid := 0
+	var newProduct Product
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	err = json.Unmarshal(reqBody, &newProduct)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-
 	}
-	response := "This is a put request"
-	_, err = w.Write([]byte(response))
-	fmt.Println("r now", r)
-	fmt.Println("r.Form", r.Form)
-	fmt.Println("r.PostForm", r.PostForm)
+	product = append(product, newProduct)
 
+	json.NewEncoder(w).Encode(newProduct)
+
+	_, err = fmt.Sscan(id, &intid)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	for _, products := range product {
+		if intid > len(product) {
+			w.WriteHeader(http.StatusNotFound)
+			response := "404 status not found"
+			_, err = w.Write([]byte(response))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			return
+		}
+		if intid == products.ID {
+			product[intid] = newProduct
+		}
+	}
 }
-
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]

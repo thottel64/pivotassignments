@@ -118,24 +118,11 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	intid := 0
-	var newProduct Product
-	reqBody, err := ioutil.ReadAll(r.Body)
+	_, err := fmt.Sscan(id, &intid)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Fatalln(err)
 	}
-
-	err = json.Unmarshal(reqBody, &newProduct)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	json.NewEncoder(w).Encode(newProduct)
-
-	_, err = fmt.Sscan(id, &intid)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	for _, products := range product {
+	for index, products := range product {
 		if intid > len(product) {
 			w.WriteHeader(http.StatusNotFound)
 			response := "404 status not found"
@@ -145,8 +132,16 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-		if intid == products.ID {
-			product[intid] = newProduct
+		if products.ID == intid {
+			product = append(product[:index], product[:index+1]...)
+			err = json.NewDecoder(r.Body).Decode(&product)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			products.ID = intid
+			product = append(product, products)
+			json.NewEncoder(w).Encode(product)
+			return
 		}
 	}
 }

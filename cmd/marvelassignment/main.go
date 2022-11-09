@@ -1,12 +1,16 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -17,30 +21,39 @@ func main() {
 	}
 	publicKey := os.Getenv("MARVEL_PUBLIC_KEY")
 	privateKey := os.Getenv("MARVEL_PRIVATE_KEY")
-	fmt.Println(publicKey, privateKey)
+	//fmt.Println(publicKey, privateKey)
 
 	client := marvelClient{
+		baseURL:    "https://gateway.marvel.com:443/v1/public/",
 		publickey:  publicKey,
 		privatekey: privateKey,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 	}
-
+	character, err := client.getCharacters()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	spew.Dump(character)
 }
 
 type marvelClient struct {
+	baseURL    string
 	publickey  string
 	privatekey string
 	httpClient *http.Client
 }
 
 func (c *marvelClient) getCharacters() ([]Character, error) {
-	response, err := c.httpClient.Get("https://gateway.marvel.com:443/v1/public/characters")
+	url := c.baseURL + "characters"
+	url = c.urlSig(url)
+	response, err := c.httpClient.Get(c.urlSig(url))
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
+	spew.Dump(url, response.Status, response.StatusCode)
 
 	var characterResponse CharacterResponse
 	err = json.NewDecoder(response.Body).Decode(&characterResponse)
@@ -70,4 +83,16 @@ type CharacterResponse struct {
 		Count   int         `json:"count"`
 		Results []Character `json:"results"`
 	} `json:"data"`
+}
+
+func (c *marvelClient) md5hash(ts int64) string {
+	tsForHash := strconv.Itoa(int(ts))
+	hash := md5.Sum([]byte(tsForHash + c.privatekey + c.publickey))
+	return hex.EncodeToString(hash[:])
+}
+
+func (c *marvelClient) urlSig(url string) string {
+	ts := time.Now().Unix()
+	hash := c.md5hash(ts)
+	return fmt.Sprintf("%s?ts=%d&apikey=%s&hash=%s", url, ts, c.publickey, hash)
 }

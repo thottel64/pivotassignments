@@ -17,25 +17,25 @@ type Product struct {
 	Price       int    `json:"price"`
 }
 
-var product []Product
+var products []Product
 
 func main() {
 	InitProducts()
 
 	// the data is now unmarshaled into our struct
 	r := mux.NewRouter()
-	r.HandleFunc("/products", GetHandler).Methods("GET")
-	r.HandleFunc("/products/{id}", GetIDHandler).Methods("GET")
-	r.HandleFunc("/products", PostHandler).Methods("POST")
-	r.HandleFunc("/products/{id}", PutHandler).Methods("PUT")
-	r.HandleFunc("/products/{id}", DeleteHandler).Methods("DELETE")
+	r.HandleFunc("/productss", GetHandler).Methods("GET")
+	r.HandleFunc("/productss/{id}", GetIDHandler).Methods("GET")
+	r.HandleFunc("/productss", PostHandler).Methods("POST")
+	r.HandleFunc("/productss/{id}", PutHandler).Methods("PUT")
+	r.HandleFunc("/productss/{id}", DeleteHandler).Methods("DELETE")
 	fmt.Println("Server is running")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))
 }
 
 func InitProducts() {
 	// step 1: use the HTTP package to get the data and defer the request to prevent a data leak
-	response, err := http.Get("https://gist.githubusercontent.com/jboursiquot/259b83a2d9aa6d8f16eb8f18c67f5581/raw/9b28998704fb06f127f13540a4f6e3812f50774b/products.json")
+	response, err := http.Get("https://gist.githubusercontent.com/jboursiquot/259b83a2d9aa6d8f16eb8f18c67f5581/raw/9b28998704fb06f127f13540a4f6e3812f50774b/productss.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -47,7 +47,7 @@ func InitProducts() {
 	}
 
 	//step 3 unmarshal the slice of bytes into a struct
-	err = json.Unmarshal(byteslice, &product)
+	err = json.Unmarshal(byteslice, &products)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -57,7 +57,7 @@ func InitProducts() {
 }
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(product)
+	err := json.NewEncoder(w).Encode(products)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -71,14 +71,14 @@ func GetIDHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	if intid > len(product) {
+	if intid > len(products) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	for _, products := range product {
+	for _, productss := range products {
 
-		if products.ID == intid {
-			response, err := json.Marshal(product[intid-1])
+		if productss.ID == intid {
+			response, err := json.Marshal(products[intid-1])
 			if err != nil {
 				log.Print("error 3")
 				w.WriteHeader(http.StatusInternalServerError)
@@ -107,7 +107,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	product = append(product, newProduct)
+	products = append(products, newProduct)
 	w.WriteHeader(http.StatusCreated)
 
 }
@@ -119,7 +119,7 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if intid > len(product) {
+	if intid > len(products) {
 		w.WriteHeader(http.StatusNotFound)
 		response := "404 status not found"
 		_, err = w.Write([]byte(response))
@@ -128,16 +128,16 @@ func PutHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	for index, p := range product {
+	for index, p := range products {
 		if p.ID == intid {
-			product = append(product[:index], product[:index+1]...)
-			err = json.NewDecoder(r.Body).Decode(&product)
+			products = append(products[:index], products[:index+1]...)
+			err = json.NewDecoder(r.Body).Decode(&products)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 			p.ID = intid
-			product = append(product, p)
-			json.NewEncoder(w).Encode(product)
+			products = append(products, p)
+			json.NewEncoder(w).Encode(products)
 			return
 		}
 	}
@@ -150,7 +150,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	if intid > len(product) {
+	if intid > len(products) {
 		w.WriteHeader(http.StatusNotFound)
 		response := "404 status not found"
 		_, err = w.Write([]byte(response))
@@ -159,9 +159,9 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	for index, products := range product {
-		if products.ID == intid {
-			product = append(product[:index], product[index+1:]...)
+	for index, p := range products {
+		if p.ID == intid {
+			products = append(products[:index], products[index+1:]...)
 			w.WriteHeader(http.StatusOK)
 		}
 	}

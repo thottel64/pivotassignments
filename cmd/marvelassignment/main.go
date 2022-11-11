@@ -21,10 +21,10 @@ func main() {
 	}
 	publicKey := os.Getenv("MARVEL_PUBLIC_KEY")
 	privateKey := os.Getenv("MARVEL_PRIVATE_KEY")
-	//fmt.Println(publicKey, privateKey)
+	spew.Dump(publicKey, privateKey)
 
 	client := marvelClient{
-		baseURL:    "https://gateway.marvel.com:443/v1/public/",
+		baseURL:    "https://gateway.marvel.com/v1/public/",
 		publickey:  publicKey,
 		privatekey: privateKey,
 		httpClient: &http.Client{

@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("/Users/taylor.hottel/pivotassignments/cmd/marvelassignment/.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -31,11 +31,11 @@ func main() {
 			Timeout: 10 * time.Second,
 		},
 	}
-	character, err := client.getCharacters()
+	characters, err := client.getCharacters()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	spew.Dump(character)
+	fmt.Println(characters)
 }
 
 type marvelClient struct {
@@ -47,13 +47,11 @@ type marvelClient struct {
 
 func (c *marvelClient) getCharacters() ([]Character, error) {
 	url := c.baseURL + "characters"
-	url = c.urlSig(url)
 	response, err := c.httpClient.Get(c.urlSig(url))
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
-	spew.Dump(url, response.Status, response.StatusCode)
 
 	var characterResponse CharacterResponse
 	err = json.NewDecoder(response.Body).Decode(&characterResponse)

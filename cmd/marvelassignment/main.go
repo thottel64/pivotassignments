@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -15,13 +14,12 @@ import (
 )
 
 func main() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	publicKey := os.Getenv("MARVEL_PUBLIC_KEY")
 	privateKey := os.Getenv("MARVEL_PRIVATE_KEY")
-	spew.Dump(publicKey, privateKey)
 
 	client := marvelClient{
 		baseURL:    "https://gateway.marvel.com/v1/public/",
@@ -35,7 +33,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(characters)
+	for _, character := range characters {
+		fmt.Println(character.Name, character.Description)
+	}
 }
 
 type marvelClient struct {

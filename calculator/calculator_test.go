@@ -5,22 +5,26 @@ import (
 	"testing"
 )
 
+type functions struct {
+	a               int
+	b               int
+	desired         int
+	operation       func(int, int) int
+	divideoperation func(int, int) (int, error)
+	err             error
+}
+
+var testingmap = map[string]functions{
+	"Add":          {a: 3, b: 2, desired: 5, operation: calculator.Add},
+	"Subtract":     {a: 10, b: 7, desired: 3, operation: calculator.Subtract},
+	"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},
+	"Divide":       {a: 12, b: 3, desired: 4, divideoperation: calculator.Divide},
+	"DivideByZero": {a: 1, b: 0, desired: 0, divideoperation: calculator.Divide, err: calculator.DivideByZero{}},
+}
+
 func TestFunctions(t *testing.T) {
-	testmap := map[string]struct {
-		a               int
-		b               int
-		desired         int
-		operation       func(int, int) int
-		divideoperation func(int, int) (int, error)
-		err             error
-	}{
-		"Add":          {a: 3, b: 2, desired: 5, operation: calculator.Add},
-		"Subtract":     {a: 10, b: 7, desired: 3, operation: calculator.Subtract},
-		"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},
-		"Divide":       {a: 12, b: 3, desired: 4, divideoperation: calculator.Divide},
-		"DivideByZero": {a: 1, b: 0, desired: 0, divideoperation: calculator.Divide, err: calculator.DivideByZero{}},
-	}
-	for name, test := range testmap {
+
+	for name, test := range testingmap {
 		t.Run(name, func(t *testing.T) {
 			if test.operation != nil {
 				result := test.operation(test.a, test.b)

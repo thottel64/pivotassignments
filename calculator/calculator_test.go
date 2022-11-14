@@ -9,7 +9,11 @@ import (
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 type testingvariables struct {
+=======
+type functions struct {
+>>>>>>> 0bc471e (made changes to map and struct setup)
 	a               int
 	b               int
 	desired         int
@@ -18,7 +22,11 @@ type testingvariables struct {
 	err             error
 }
 
+<<<<<<< HEAD
 var testingmap = map[string]testingvariables{
+=======
+var testingmap = map[string]functions{
+>>>>>>> 0bc471e (made changes to map and struct setup)
 	"Add":          {a: 3, b: 2, desired: 5, operation: calculator.Add},
 	"Subtract":     {a: 10, b: 7, desired: 3, operation: calculator.Subtract},
 	"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},
@@ -26,6 +34,7 @@ var testingmap = map[string]testingvariables{
 	"DivideByZero": {a: 1, b: 0, desired: 0, divideoperation: calculator.Divide, err: calculator.DivideByZero{}},
 }
 
+<<<<<<< HEAD
 func TestFunctions(t *testing.T) {
 
 	for name, test := range testingmap {
@@ -149,6 +158,11 @@ func TestFunctions(t *testing.T) {
 >>>>>>> d5428be (updated test functions to be table-driven)
 	}
 	for name, test := range testmap {
+=======
+func TestFunctions(t *testing.T) {
+
+	for name, test := range testingmap {
+>>>>>>> 0bc471e (made changes to map and struct setup)
 		t.Run(name, func(t *testing.T) {
 			if test.operation != nil {
 				result := test.operation(test.a, test.b)

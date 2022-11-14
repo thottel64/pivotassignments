@@ -10,10 +10,14 @@ import (
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 type testingvariables struct {
 =======
 type functions struct {
 >>>>>>> 0bc471e (made changes to map and struct setup)
+=======
+type testingvariables struct {
+>>>>>>> d1661cd (updated struct name to make code more readable)
 	a               int
 	b               int
 	desired         int
@@ -23,10 +27,14 @@ type functions struct {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 var testingmap = map[string]testingvariables{
 =======
 var testingmap = map[string]functions{
 >>>>>>> 0bc471e (made changes to map and struct setup)
+=======
+var testingmap = map[string]testingvariables{
+>>>>>>> d1661cd (updated struct name to make code more readable)
 	"Add":          {a: 3, b: 2, desired: 5, operation: calculator.Add},
 	"Subtract":     {a: 10, b: 7, desired: 3, operation: calculator.Subtract},
 	"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},

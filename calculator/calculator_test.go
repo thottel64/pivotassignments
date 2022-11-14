@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-type functions struct {
+type testingvariables struct {
 	a               int
 	b               int
 	desired         int
@@ -14,7 +14,7 @@ type functions struct {
 	err             error
 }
 
-var testingmap = map[string]functions{
+var testingmap = map[string]testingvariables{
 	"Add":          {a: 3, b: 2, desired: 5, operation: calculator.Add},
 	"Subtract":     {a: 10, b: 7, desired: 3, operation: calculator.Subtract},
 	"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},

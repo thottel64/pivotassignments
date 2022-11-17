@@ -33,9 +33,9 @@ func main() {
 	}
 	err = seed(db)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		return
 	}
-	db.Query("SELECT ID, Name, Price FROM products )")
 }
 
 func seed(db *sql.DB) error {
@@ -43,7 +43,7 @@ func seed(db *sql.DB) error {
 	//if err != nil {
 	//	return err
 	//}
-	sqlStatement := "CREATE TABLE products (ID integer primary key , Name ,Price REAL); delete from products"
+	sqlStatement := "CREATE TABLE products (ID primary key , Name ,Price); delete from products"
 	_, err := db.Exec(sqlStatement)
 	if err != nil {
 		fmt.Println("error with sqlstatement")
@@ -66,66 +66,16 @@ func seed(db *sql.DB) error {
 
 	}
 	err = transaction.Commit()
+	if err != nil {
+		return err
+	}
+	rows, err := db.Query("SELECT ID, Name, Price FROM products WHERE ID <= 5)")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
 	return nil
 }
-
-//func query(db *sql.DB) error {
-//	rows, err := db.Query("select ID from table ( products )")
-//	if err != nil {
-//		return err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		var id int
-//		var name string
-//		var price float64
-//		err = rows.Scan(&id, &name, &price)
-//		if err != nil {
-//			return err
-//		}
-//		fmt.Println(id, name, price)
-//	}
-//	err = rows.Err()
-//	if err != nil {
-//		return err
-//	}
-//	statement, err := db.Prepare("select Name from products where ID = ?")
-//	if err != nil {
-//		return err
-//	}
-//	defer statement.Close()
-//	var name string
-//	err = statement.QueryRow("3").Scan(&name)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	fmt.Println(name)
-//
-//	_, err = db.Exec("delete from products")
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	rows, err = db.Query("select ID, Name from products")
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		var id int
-//		var name string
-//		err = rows.Scan(&id, &name)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		fmt.Println(id, name)
-//	}
-//	err = rows.Err()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	return nil
-//}
 
 func InitProducts() {
 	// step 1: use the HTTP package to get the data and defer the request to prevent a data leak

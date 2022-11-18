@@ -43,24 +43,27 @@ func seed(db *sql.DB) error {
 	//if err != nil {
 	//	return err
 	//}
-	sqlStatement := "CREATE TABLE products (ID primary key , Name ,Price); delete from products"
-	_, err := db.Exec(sqlStatement)
-	if err != nil {
-		fmt.Println("error with sqlstatement")
-		return err
-	}
+	//sqlStatement := "CREATE TABLE products (ID primary key , Name ,Price); delete from products"
+	//_, err := db.Exec(sqlStatement)
+	//if err != nil {
+	//	fmt.Println("error with sqlstatement")
+	//	return err
+	//}
 	transaction, err := db.Begin()
 	if err != nil {
+		fmt.Println("error on line 52")
 		return err
 	}
 	statement, err := transaction.Prepare("INSERT INTO products(ID, Name, Price) VALUES(?,?,?) ")
 	if err != nil {
+		fmt.Println("error on line 57")
 		return err
 	}
 	defer statement.Close()
 	for _, product := range products {
 		_, err := statement.Exec(product.ID, product.Name, product.Price)
 		if err != nil {
+			fmt.Println("error on line 64")
 			return err
 		}
 
@@ -71,8 +74,10 @@ func seed(db *sql.DB) error {
 	}
 	rows, err := db.Query("SELECT ID, Name, Price FROM products WHERE ID <= 5)")
 	if err != nil {
+		fmt.Println("error with query")
 		return err
 	}
+	fmt.Println(rows)
 	defer rows.Close()
 	return nil
 }

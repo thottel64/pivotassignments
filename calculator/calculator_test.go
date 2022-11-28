@@ -12,6 +12,7 @@ type testingvariables struct {
 	operation       func(int, int) int
 	divideoperation func(int, int) (int, error)
 	err             error
+	poweroperation  func(float64, float64) float64
 }
 
 var testingmap = map[string]testingvariables{
@@ -20,6 +21,7 @@ var testingmap = map[string]testingvariables{
 	"Multiply":     {a: 6, b: 4, desired: 24, operation: calculator.Multiply},
 	"Divide":       {a: 12, b: 3, desired: 4, divideoperation: calculator.Divide},
 	"DivideByZero": {a: 1, b: 0, desired: 0, divideoperation: calculator.Divide, err: calculator.DivideByZero{}},
+	"Power":        {a: 2, b: 3, desired: 8, poweroperation: calculator.Pow},
 }
 
 func TestFunctions(t *testing.T) {
@@ -31,6 +33,12 @@ func TestFunctions(t *testing.T) {
 				if result != test.desired {
 					t.Errorf("got %v, want %v", result, test.desired)
 					return
+				}
+			}
+			if test.poweroperation != nil {
+				result := test.poweroperation(float64(test.a), float64(test.b))
+				if int(result) != test.desired {
+					t.Errorf("got %v, want %v", result, test.desired)
 				}
 			}
 			if test.divideoperation != nil {

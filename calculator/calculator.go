@@ -23,7 +23,6 @@ type DivideByZero struct{}
 func (DivideByZero) Error() string {
 	return "cannot divide by zero"
 }
-
 func Pow(x, y float64) float64 {
 	return math.Pow(x, y)
 }

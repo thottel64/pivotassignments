@@ -52,7 +52,7 @@ func seed(db *sql.DB) ([]Product, error) {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	rows, err := db.Query("SELECT ID, Name, Price FROM products LIMit 5)")
 	if err != nil {

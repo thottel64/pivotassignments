@@ -11,10 +11,9 @@ import (
 )
 
 type Product struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int    `json:"price"`
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
 }
 
 var products []Product
@@ -27,44 +26,27 @@ func main() {
 		return
 	}
 	defer db.Close()
-	err = seed(db)
+	products, err = seed(db)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = seed(db)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	fmt.Println(products)
 }
 
-func seed(db *sql.DB) error {
-	//err := os.Remove("products.db")
-	//if err != nil {
-	//	return err
-	//}
-	//sqlStatement := "CREATE TABLE products (ID primary key , Name ,Price); delete from products"
-	//_, err := db.Exec(sqlStatement)
-	//if err != nil {
-	//	fmt.Println("error with sqlstatement")
-	//	return err
-	//}
+func seed(db *sql.DB) ([]Product, error) {
 	transaction, err := db.Begin()
 	if err != nil {
-		fmt.Println("error on line 52")
-		return err
+		return nil, err
 	}
 	statement, err := transaction.Prepare("INSERT INTO products(ID, Name, Price) VALUES(?,?,?) ")
 	if err != nil {
-		fmt.Println("error on line 57")
-		return err
+		return nil, err
 	}
 	defer statement.Close()
 	for _, product := range products {
 		_, err := statement.Exec(product.ID, product.Name, product.Price)
 		if err != nil {
-			fmt.Println("error on line 64")
-			return err
+			return nil, err
 		}
 
 	}
@@ -72,14 +54,13 @@ func seed(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	rows, err := db.Query("SELECT ID, Name, Price FROM products WHERE ID <= 5)")
+	rows, err := db.Query("SELECT ID, Name, Price FROM products LIMit 5)")
 	if err != nil {
 		fmt.Println("error with query")
-		return err
+		return nil, err
 	}
 	fmt.Println(rows)
-	defer rows.Close()
-	return nil
+	return products, nil
 }
 
 func InitProducts() {

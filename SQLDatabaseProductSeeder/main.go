@@ -16,24 +16,22 @@ type Product struct {
 	Price int    `json:"price"`
 }
 
-var products []Product
-
 func main() {
-	InitProducts()
+	products, err := InitProducts()
 	db, err := sql.Open("sqlite3", "products.db")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer db.Close()
-	products, err = seed(db)
+	products, err = seed(db, products)
 	if err != nil {
-		log.Fatalln(err)
+		return
 	}
 	fmt.Println(products)
 }
 
-func seed(db *sql.DB) ([]Product, error) {
+func seed(db *sql.DB, products []Product) ([]Product, error) {
 	transaction, err := db.Begin()
 	if err != nil {
 		return nil, err
@@ -54,7 +52,7 @@ func seed(db *sql.DB) ([]Product, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.Query("SELECT ID, Name, Price FROM products LIMit 5)")
+	rows, err := db.Query("SELECT ID, Name, Price FROM products LIMIT 5)")
 	if err != nil {
 		fmt.Println("error with query")
 		return nil, err
@@ -63,25 +61,22 @@ func seed(db *sql.DB) ([]Product, error) {
 	return products, nil
 }
 
-func InitProducts() {
-	// step 1: use the HTTP package to get the data and defer the request to prevent a data leak
+func InitProducts() ([]Product, error) {
+	var products []Product
 	response, err := http.Get("https://gist.githubusercontent.com/jboursiquot/259b83a2d9aa6d8f16eb8f18c67f5581/raw/9b28998704fb06f127f13540a4f6e3812f50774b/products.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer response.Body.Close()
-	//step 2 read the data and save it to a slice of bytes
 	byteslice, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	//step 3 unmarshal the slice of bytes into a struct
 	err = json.Unmarshal(byteslice, &products)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	// step 4 print out the data
 	log.Printf("%s", response.Status)
 
+	return products, err
 }

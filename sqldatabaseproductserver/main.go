@@ -18,12 +18,13 @@ type Product struct {
 	Price int    `json:"price"`
 }
 
-var products []Product
+var db *sql.DB
+var err error
 
 func main() {
-	db, err := sql.Open("sqlite3", "products.db")
+	db, err = sql.Open("sqlite3", "products.db")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error opening database")
 		return
 	}
 	err = db.Ping()
@@ -43,10 +44,7 @@ func main() {
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "products.db")
-	if err != nil {
-		return
-	}
+	var products []Product
 	limit := r.FormValue("limit")
 	query := "SELECT * FROM products LIMIT " + limit + ";"
 	if limit == "" {
@@ -77,36 +75,28 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "products.db")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	vars := mux.Vars(r)
 	stringid := vars["id"]
+	intid, err := strconv.Atoi(stringid)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	intid, err := strconv.Atoi(stringid)
 	if intid > 100 {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	query := "SELECT * FROM products WHERE ID = " + stringid + ";"
-	result, err := db.Query(query)
+	result := db.QueryRow(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer result.Close()
 	var product Product
-	for result.Next() {
-		err := result.Scan(&product.ID, &product.Name, &product.Price)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	err = result.Scan(&product.ID, &product.Name, &product.Price)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	response, err := json.Marshal(product)
 	if err != nil {
@@ -121,11 +111,6 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 func AddProduct(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "products.db")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	request, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -152,11 +137,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "products.db")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	vars := mux.Vars(r)
 	stringid := vars["id"]
 	id, err := strconv.Atoi(stringid)
@@ -195,11 +175,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "products.db")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	vars := mux.Vars(r)
 	stringid := vars["id"]
 	id, err := strconv.Atoi(stringid)

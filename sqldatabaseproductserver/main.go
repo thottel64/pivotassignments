@@ -21,7 +21,8 @@ type Product struct {
 var db *sql.DB
 
 func main() {
-	db, err := sql.Open("sqlite3", "products.db")
+	var err error
+	db, err = sql.Open("sqlite3", "products.db")
 	if err != nil {
 		fmt.Println("error opening database")
 		return
@@ -45,16 +46,22 @@ func main() {
 func GetProducts(w http.ResponseWriter, r *http.Request) {
 	var products []Product
 	limit := r.FormValue("limit")
-	query := "SELECT * FROM products LIMIT " + limit + ";"
-	if limit == "" {
-		query = "SELECT * FROM products;"
-	}
-	result, err := db.Query(query)
+	stmt, err := db.Prepare("SELECT * FROM products LIMIT ?;")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer result.Close()
+	result, err := stmt.Query(limit)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = stmt.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	for result.Next() {
 		var product Product
 		err := result.Scan(&product.ID, &product.Name, &product.Price)
@@ -85,17 +92,29 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	query := "SELECT * FROM products WHERE ID = " + stringid + ";"
-	result := db.QueryRow(query)
+	stmt, err := db.Prepare("SELECT * FROM products WHERE ID =?;")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	result, err := stmt.Query(intid)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	err = stmt.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	var product Product
-	err = result.Scan(&product.ID, &product.Name, &product.Price)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	log.Println(result)
+	for result.Next() {
+		err = result.Scan(&product.ID, &product.Name, &product.Price)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 	response, err := json.Marshal(product)
 	if err != nil {
@@ -126,12 +145,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	query := "INSERT INTO products (ID, Name, Price) VALUES (" + string(newproduct.ID) + ",`" + newproduct.Name + "`," + string(newproduct.Price) + ");"
-	_, err = db.Exec(query)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	stmt, err := db.Prepare("INSERT INTO products (ID, Name, Price) VALUES (?,?,?);")
+	_, err = stmt.Exec(newproduct.ID, newproduct.Name, newproduct.Price)
 	w.WriteHeader(http.StatusCreated)
 
 }
@@ -163,8 +178,13 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	query := "UPDATE products SET Name = `" + newproduct.Name + "`, Price = " + string(newproduct.Price) + " WHERE ID =" + stringid
-	_, err = db.Exec(query)
+
+	stmt, err := db.Prepare("UPDATE products SET Name =?, Price =?, WHERE ID =?")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = stmt.Exec(newproduct.Name, newproduct.Price, newproduct.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -185,8 +205,12 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	query := "DELETE FROM products WHERE ID =" + stringid
-	_, err = db.Exec(query)
+	stmt, err := db.Prepare("DELETE FROM products WHERE ID =?")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = stmt.Exec(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

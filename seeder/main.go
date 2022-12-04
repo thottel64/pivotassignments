@@ -19,10 +19,9 @@ type Product struct {
 }
 
 var db *sql.DB
-var err error
 
 func main() {
-	db, err = sql.Open("sqlite3", "products.db")
+	db, err := sql.Open("sqlite3", "products.db")
 	if err != nil {
 		fmt.Println("error opening database")
 		return

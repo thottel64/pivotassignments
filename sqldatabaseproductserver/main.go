@@ -97,24 +97,18 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	result, err := stmt.Query(intid)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	result := stmt.QueryRow(intid)
 	err = stmt.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	var product Product
-	log.Println(result)
-	for result.Next() {
-		err = result.Scan(&product.ID, &product.Name, &product.Price)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	err = result.Scan(&product.ID, &product.Name, &product.Price)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	response, err := json.Marshal(product)
 	if err != nil {

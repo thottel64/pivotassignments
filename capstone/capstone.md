@@ -22,6 +22,7 @@ For this project I will demonstrate the following:
 5. Using .gitignore to obscure sensitive information
 6. Using structs in Go as objects within a game
 7. Following good coding practices (i.e. handling all errors, and logging them accordingly)
+8. Hosting files on a third party PaaS platform, Railway.
 
 
 ## User Stories
@@ -76,3 +77,9 @@ Fightbot: you just punched @User1 for 10 Damage, leaving them with 0 HP.
 
 Fightbot: @User2 is your winner of the round!
 ```
+### As a user, I would like to be able to be able to use this bot at any time without having to run the program on my local machine
+
+**Acceptance Criteria**
+
+By creating a separate repo, pushing it to github, and hosting my bot on railway, I am able to access my bot on any server
+that I invite it to at any time during the day without having to run the bot locally on my machine.

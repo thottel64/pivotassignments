@@ -77,7 +77,6 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
@@ -86,10 +85,6 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 	intid, err := strconv.Atoi(stringid)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if intid > 100 {
-		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	stmt, err := db.Prepare("SELECT * FROM products WHERE ID =?;")
@@ -120,7 +115,6 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 func AddProduct(w http.ResponseWriter, r *http.Request) {
 	request, err := io.ReadAll(r.Body)
@@ -140,7 +134,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	_, err = stmt.Exec(newproduct.ID, newproduct.Name, newproduct.Price)
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(http.StatusInternalServerError)
 
 }
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +165,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = stmt.Exec(newproduct.Name, newproduct.Price, newproduct.ID)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

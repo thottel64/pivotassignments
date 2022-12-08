@@ -128,20 +128,19 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	newproduct := Product{
-		ID:    0,
-		Name:  "",
-		Price: 0,
-	}
+	newproduct := Product{}
 
 	err = json.Unmarshal(request, &newproduct)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	stmt, err := db.Prepare("INSERT INTO products (ID, Name, Price) VALUES (?,?,?);")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	_, err = stmt.Exec(newproduct.ID, newproduct.Name, newproduct.Price)
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusBadRequest)
 
 }
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -152,24 +151,16 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if id > 100 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	request, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	newproduct := Product{
-		ID:    0,
-		Name:  "",
-		Price: 0,
-	}
+	newproduct := Product{}
 
 	err = json.Unmarshal(request, &newproduct)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -183,7 +174,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 
 }
 
@@ -195,10 +185,6 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if id > 100 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
 	stmt, err := db.Prepare("DELETE FROM products WHERE ID =?")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -206,8 +192,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = stmt.Exec(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }

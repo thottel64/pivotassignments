@@ -134,7 +134,9 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	_, err = stmt.Exec(newproduct.ID, newproduct.Name, newproduct.Price)
-	w.WriteHeader(http.StatusInternalServerError)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 }
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
